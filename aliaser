@@ -38,7 +38,7 @@ function primary-private-grab {
 }
 
 function private-cidr-grab {
-	PRIVATECIDRBITS=($(curl -s -f http://169.254.169.254/latest/meta-data/network/interfaces/macs/06:69:1f:2c:7a:33/subnet-ipv4-cidr-block | cut -d "/" -f 2))
+	PRIVATECIDRBITS=($(curl -s -f http://169.254.169.254/latest/meta-data/network/interfaces/macs/$MAC_ADDR/subnet-ipv4-cidr-block | cut -d "/" -f 2))
 }
 
 
