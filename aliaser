@@ -37,11 +37,16 @@ function primary-private-grab {
 	PRIMARYPRIV=($(curl -s -f http://169.254.169.254/latest/meta-data/local-ipv4))
 }
 
+function private-cidr-grab {
+	PRIVATECIDRBITS=($(curl -s -f http://169.254.169.254/latest/meta-data/network/interfaces/macs/06:69:1f:2c:7a:33/subnet-ipv4-cidr-block | cut -d "/" -f 2))
+}
+
+
 function private-loop {
 	for priv in ${PRIVATE[@]:1};
         do
                 echo "Adding IP: $priv"
-                ip addr add dev eth0 $priv/20
+                ip addr add dev eth0 $priv/$PRIVATECIDRBITS
         done
 }
 
@@ -53,6 +58,7 @@ case "$1" in
 'version' | '-v' | '-V') printf "aliaser v0.01
 -----------------------------------
 ©2015 Josh Wieder\nhttp://www.joshwieder.net/\njosh.wieder@live.com
+Modified for Edify Hub, LLC by Joshua Dwire on 01/05/2017: https://github.com/joshuadwire/aliaser
 -----------------------------------
 aliaser comes with ABSOLUTELY NO WARRANTY.
 This is free software made available through
@@ -63,12 +69,14 @@ conditions - see LICENSE for details.\n\n"
 
 'start') mac-grab
 	private-grab
+	private-cidr-grab
 	private-loop
 	;;
 
 'restart') service network restart
 	mac-grab
-	private-grab        
+	private-grab
+	private-cidr-grab
 	private-loop
 	;;
 
@@ -79,6 +87,9 @@ conditions - see LICENSE for details.\n\n"
 	
 	primary-private-grab
 	printf "Primary private IPs:  %s\n" "$PRIMARYPRIV"
+
+	private-cidr-grab
+	printf "Primary private IP CIDR Bits:  %d\n" "$PRIVATECIDRBITS"
 
 	private-grab
         for priv in ${PRIVATE[@]:1};
